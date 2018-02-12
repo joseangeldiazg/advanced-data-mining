@@ -1,0 +1,223 @@
+---
+title: "Práctica Clases No Balanceadas"
+author: "joseangeldiazg"
+date: "12/2/2018"
+output: pdf_document
+---
+
+## Minería de Datos: Aspectos Avanzados.
+
+### Práctica 1: Imbalance Learning
+
+El objetivo de esta práctica es comprender las implicaciones que tiene un conjunto con clases desequilibrabas en el rendimiento de clasificadores estandard. 
+
+Para ello, se estudiarán soluciones basadas en: Random Oversampling (ROS), Random Undersampling (RUS) y Synthetic Minority Oversampling Technique (SMOTE). 
+
+### Preparación de datos y rendimiento básico de clasificación
+
+En este punto se procede a la lectura de los datos y a crear 5 particiones que guardan el ratio de desbalanceo, para posteriormente poder usar validación cruzada. En este punto se ha utilizado código de Sarah Vluymans, Sarah.Vluymans@UGent.be.
+
+
+#### Subclus Dataset
+
+
+El primer paso es cargar los datos y determinar el ratio de desbalanceo de las clases. 
+
+
+```{r}
+subclus <- read.table("data/subclus.txt", sep=",")
+colnames(subclus) <- c("Att1", "Att2", "Class")
+
+unique(subclus$Class)
+nClass0 <- sum(subclus$Class == 0)
+nClass1 <- sum(subclus$Class == 1)
+IR <- nClass1 / nClass0
+IR
+```
+
+El ratio de desbalanceo es 5, lo que nos indica que tenemos cinco muestras de la clase mayoritaria por cada 1 de la minoritaria. Vamos a representar la distribución de clases de manera visual. 
+
+```{r}
+plot(subclus$Att1, subclus$Att2)
+points(subclus[subclus$Class==0,1],subclus[subclus$Class==0,2],col="red")
+points(subclus[subclus$Class==1,1],subclus[subclus$Class==1,2],col="blue")  
+```
+
+Acorde al gráfico podemos comprobar que hay cierto solapamiento de clases y tenemos un problema de una cierta complejidad aunque el algoritmo knn funcionará bastante bien ya que hay grupos bastante definidos.**Aplicamos el clasificador knn** para ver el rendimiento del mismo sobre el problema sin pre-procesar, pero antes creamos 5 particiones para aplicar *cross validation*.
+
+```{r}
+pos <- (1:dim(subclus)[1])[subclus$Class==0]
+neg <- (1:dim(subclus)[1])[subclus$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
+# Base performance of 3NN
+library(class)
+knn.pred = NULL
+for( i in 1:5){
+  predictions <- knn(subclus[-CVperm[,i], -3], subclus[CVperm[,i], -3], subclus[-CVperm[,i], 3], k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+acc <- sum((subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) 
+           | (subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2)) / (nClass0 + nClass1)
+tpr <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean <- sqrt(tpr * tnr)
+```
+
+Acorde a la premisa que hemos postulado antes, el algoritmo knn se comporta bien aunque seguramente tras un proceso previo de pre-procesado podramos obtener mejores resultados. Vamos a realizar ahora los mismos pasos sobre el dataset **circle**.
+
+
+#### Circle Dataset
+
+Leemos los datos.
+
+```{r}
+circle <- read.table("data/circle.txt", sep=",")
+colnames(circle) <- c("V1", "V2", "Class")
+
+unique(circle$Class)
+nClass0 <- sum(circle$Class == 0)
+nClass1 <- sum(circle$Class == 1)
+IR <- nClass1 / nClass0
+IR
+```
+
+
+El ratio de desbalanceo en este caso es aún más acentuado. Teniendo casi 43 muestras de la clase 1 por cada muestra de la clase 0. Por tanto, cabe esperar un sesgo hacia la case mayoritaría muy fuerte, al menos, en accuracy. Vamos a comprobar las características del problema en cuanto a su distribucion gráfica de clases. 
+
+```{r}
+plot(circle$V1, circle$V2)
+points(circle[circle$Class==0,1],circle[circle$Class==0,2],col="red")
+points(circle[circle$Class==1,1],circle[circle$Class==1,2],col="blue")  
+```
+
+Parece que el problema va a ser bastante sencillo, pero dada la gran cantidad de muestras de clase 1, puede que no clasifiquemos correctamente ninguna de clase 0. Vamos a aplicar el clasificador. 
+
+```{r}
+pos <- (1:dim(circle)[1])[circle$Class==0]
+neg <- (1:dim(circle)[1])[circle$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
+# Base performance of 3NN
+knn.pred = NULL
+for( i in 1:5){
+  predictions <- knn(circle[-CVperm[,i], -3], circle[CVperm[,i], -3], circle[-CVperm[,i], 3], k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+acc <- sum((circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1) 
+           | (circle$Class[as.vector(CVperm)] == 1 & knn.pred == 2)) / (nClass0 + nClass1)
+tpr <- sum(circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr <- sum(circle$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean <- sqrt(tpr * tnr)
+```
+
+### Random Oversampling
+
+La idea de esta técnica es en la de generar muestras aleatorias de la clase minoritaria hasta igualar la clase minoritaria. 
+
+
+
+
+```{r}
+knn.pred = NULL
+for( i in 1:5){
+  
+  train <- subclus[-CVperm[,i], -3]
+  classes.train <- subclus[-CVperm[,i], 3] 
+  test  <- subclus[CVperm[,i], -3]
+  
+  # randomly oversample the minority class (class 0)
+  minority.indices <- (1:dim(train)[1])[classes.train == 0]
+  to.add <- dim(train)[1] - 2 * length(minority.indices)
+  duplicate <- sample(minority.indices, to.add, replace = T)
+  for( j in 1:length(duplicate)){
+    train <- rbind(train, train[duplicate[j],])
+    classes.train <- c(classes.train, 0)
+  }  
+  
+  # use the modified training set to make predictions
+  predictions <-  knn(train, test, classes.train, k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+tpr.ROS <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr.ROS <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean.ROS <- sqrt(tpr.ROS * tnr.ROS)
+
+```
+
+
+
+### SMOTE 
+
+```{r}
+distance <- function(i, j, data){
+  sum <- 0
+  for(f in 1:dim(data)[2]){
+    if(is.factor(data[,f])){ # nominal feature
+      if(data[i,f] != data[j,f]){
+        sum <- sum + 1
+      }
+    } else {
+      sum <- sum + (data[i,f] - data[j,f]) * (data[i,f] - data[j,f])
+    }
+  }
+  sum <- sqrt(sum)
+  return(sum)
+}
+```
+
+
+```{r}
+pos <- (1:dim(subclus)[1])[subclus$Class==0]
+neg <- (1:dim(subclus)[1])[subclus$Class==1]
+
+getNeighbors <- function(x, minority.instances, train,k)
+{ 
+  salida=vector()
+  kvecinos=vector()
+  indices=vector()
+  
+  #Para cada muestra minoritaria
+  for(i in 1:length(minority.instances))
+  {
+    #Si el elemento es distinto a el mismo 
+    if(x != minority.instances[i])
+    {
+      #calculamos la distancia de ese elemento con el otro de la muestra minoritaria y añadimos su indice como nombre
+      salida[i]<-distance(x,minority.instances[i],train)
+      indices[i]<-as.character(minority.instances[i])
+    }
+  }
+  
+  #Ordenamos la lista con las distancias 
+  names(salida)<-indices
+  salida<-sort(salida, decreasing = FALSE)
+  
+  
+  #Devolvemos los k primeros
+  for(j in 1:k)
+  {
+    kvecinos[j]<-salida[j]
+   
+    print(names(salida[j]))
+  }
+  names(kvecinos)<-names(salida)[1:k]
+  return(kvecinos)
+}
+```
+
+
+```{r}
+syntheticInstance <- function(x, neighbors, data)
+{ 
+  sample()
+}
+```
