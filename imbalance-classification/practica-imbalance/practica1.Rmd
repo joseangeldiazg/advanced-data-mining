@@ -117,13 +117,13 @@ acc <- sum((circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1)
 tpr <- sum(circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
 tnr <- sum(circle$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
 gmean <- sqrt(tpr * tnr)
+acc
+gmean
 ```
 
 ### Random Oversampling
 
-La idea de esta técnica es en la de generar muestras aleatorias de la clase minoritaria hasta igualar la clase minoritaria. 
-
-
+La idea de esta técnica es en la de generar muestras aleatorias de la clase minoritaria hasta igualar la clase mayoritaria. 
 
 
 ```{r}
@@ -150,12 +150,142 @@ for( i in 1:5){
 tpr.ROS <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
 tnr.ROS <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
 gmean.ROS <- sqrt(tpr.ROS * tnr.ROS)
-
+gmean.ROS
 ```
 
 
+Vemos que el resultado de gmean, se reduce en cierta medida frente al anterior resultado con las clases sin distribuir uniformemente, lo que nos indica que habia un sesgo del clasificador hacia la clase mayoritaria que ahora hemos reducido, lo que en problemas donde predecir un elemento minoritario tenga especial relevancia, como es el caso de aplicaciones médicas, estaremos obteniendo mejores resultados. Vamos a ver ahora los resultados con el data set **circle**. 
+
+
+```{r}
+knn.pred = NULL
+for( i in 1:5){
+  
+  train <- circle[-CVperm[,i], -3]
+  classes.train <- circle[-CVperm[,i], 3] 
+  test  <- circle[CVperm[,i], -3]
+  
+  # randomly oversample the minority class (class 0)
+  minority.indices <- (1:dim(train)[1])[classes.train == 0]
+  to.add <- dim(train)[1] - 2 * length(minority.indices)
+  duplicate <- sample(minority.indices, to.add, replace = T)
+  for( j in 1:length(duplicate)){
+    train <- rbind(train, train[duplicate[j],])
+    classes.train <- c(classes.train, 0)
+  }  
+  
+  # use the modified training set to make predictions
+  predictions <-  knn(train, test, classes.train, k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+tpr.ROS <- sum(circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr.ROS <- sum(circle$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean.ROS <- sqrt(tpr.ROS * tnr.ROS)
+gmean.ROS
+```
+
+El resultado aquí es muy malo, incluso peor que la clasificación aleatoria, lo que nos indica que deberemos mejorar mucho el modelo y que hay solapamiento entre las fronteras del circulo interior y el las muestras mayoritarias del exterior.
+
+
+### Random Undersampling
+
+
+El Random Oversampling, elimina tantas muestras aleatorias como para igualar la clase mayoritaria con la minoritaria. Es decir, es una aproximación inversa al Random Oversampling.  Vamos a probar primero esta solución 
+
+```{r}
+knn.pred = NULL
+for( i in 1:5){
+  
+  train <- subclus[-CVperm[,i], -3]
+  classes.train <- subclus[-CVperm[,i], 3] 
+  test  <- subclus[CVperm[,i], -3]
+  
+  # randomly undersample the minority class (class 1)
+  majority.indices <- (1:dim(train)[1])[classes.train == 1]
+  to.remove <- 2* length(majority.indices) - dim(train)[1]
+  remove <- sample(majority.indices, to.remove, replace = F)
+  train <- train[-remove,] 
+  classes.train <- classes.train[-remove]
+  
+  # use the modified training set to make predictions
+  predictions <-  knn(train, test, classes.train, k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+tpr.RUS <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr.RUS <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean.RUS <- sqrt(tpr.RUS * tnr.RUS)
+gmean.RUS
+
+```
+
+Podemos representar gráficamente los datos para comprobar como se han eliminado las instancias. Si atendemos al gráfico, vemos como el patrón seguido ha sido totalmente aleatorio. Y estamos  perdiendo muchas instancias, por lo que puede que esta solución sea contraproducente en muchos casos. 
+
+```{r}
+# Visualization (RUS on the full dataset)
+subclus.RUS <- subclus
+majority.indices <- (1:dim(subclus.RUS)[1])[subclus.RUS$Class == 1]
+to.remove <- 2 * length(majority.indices) - dim(subclus.RUS)[1]
+remove <- sample(majority.indices, to.remove, replace = F)
+subclus.RUS <- subclus.RUS[-remove,] 
+
+plot(subclus.RUS$V1, subclus.RUS$V2)
+points(subclus.RUS[subclus.RUS$Class==0,1],subclus.RUS[subclus.RUS$Class==0,2],col="red")
+points(subclus.RUS[subclus.RUS$Class==1,1],subclus.RUS[subclus.RUS$Class==1,2],col="blue") 
+```
+
+
+Vamos a probar la misma solución con el dataset Circle. 
+
+
+```{r}
+knn.pred = NULL
+for( i in 1:5){
+  
+  train <- circle[-CVperm[,i], -3]
+  classes.train <- circle[-CVperm[,i], 3] 
+  test  <- circle[CVperm[,i], -3]
+  
+  # randomly undersample the minority class (class 1)
+  majority.indices <- (1:dim(train)[1])[classes.train == 1]
+  to.remove <- 2* length(majority.indices) - dim(train)[1]
+  remove <- sample(majority.indices, to.remove, replace = F)
+  train <- train[-remove,] 
+  classes.train <- classes.train[-remove]
+  
+  # use the modified training set to make predictions
+  predictions <-  knn(train, test, classes.train, k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+tpr.RUS <- sum(circle$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr.RUS <- sum(circle$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean.RUS <- sqrt(tpr.RUS * tnr.RUS)
+gmean.RUS
+```
+
+Los resultados son similares a los que obteniamos con ROS, vamos a comprobar gráficamente los resultados. 
+
+
+
+```{r}
+# Visualization (RUS on the full dataset)
+circle.RUS <- circle
+majority.indices <- (1:dim(circle.RUS)[1])[circle.RUS$Class == 1]
+to.remove <- 2 * length(majority.indices) - dim(circle.RUS)[1]
+remove <- sample(majority.indices, to.remove, replace = F)
+circle.RUS <- circle.RUS[-remove,] 
+
+plot(circle.RUS$V1, circle.RUS$V2)
+points(circle.RUS[circle.RUS$Class==0,1],circle.RUS[circle.RUS$Class==0,2],col="red")
+points(circle.RUS[circle.RUS$Class==1,1],circle.RUS[circle.RUS$Class==1,2],col="blue") 
+```
+
+En este caso, el problema incluso se acentua, ya que hemos perdido mucha información al respecto. 
+
 
 ### SMOTE 
+
+En esta seccion implementaremos las funciones necesarias para construir el método SMOTE (Synthetic Minority Oversampling Technique). Esta funcion se basa en la distancia por lo que haremos uso de la siguiente función:
+
 
 ```{r}
 distance <- function(i, j, data){
@@ -175,16 +305,15 @@ distance <- function(i, j, data){
 ```
 
 
-```{r}
-pos <- (1:dim(subclus)[1])[subclus$Class==0]
-neg <- (1:dim(subclus)[1])[subclus$Class==1]
+Vamos a implementar una función **getNeighbors**, que dado un ejemplo x de la clase minoritaria, las muestras minoritarias de esa clase, el dataset de train y un valor de k, calcula los k vecinos más cercanos a la intancia x, usando para ello la funcion de distancia vista anteriormente.  
 
+
+```{r}
 getNeighbors <- function(x, minority.instances, train,k)
 { 
   salida=vector()
   kvecinos=vector()
   indices=vector()
-  
   #Para cada muestra minoritaria
   for(i in 1:length(minority.instances))
   {
@@ -196,18 +325,13 @@ getNeighbors <- function(x, minority.instances, train,k)
       indices[i]<-as.character(minority.instances[i])
     }
   }
-  
   #Ordenamos la lista con las distancias 
   names(salida)<-indices
   salida<-sort(salida, decreasing = FALSE)
-  
-  
   #Devolvemos los k primeros
   for(j in 1:k)
   {
     kvecinos[j]<-salida[j]
-   
-    print(names(salida[j]))
   }
   names(kvecinos)<-names(salida)[1:k]
   return(kvecinos)
@@ -215,9 +339,121 @@ getNeighbors <- function(x, minority.instances, train,k)
 ```
 
 
+Para implementar el método SMOTE también necesitamos tener una funcion que dado los vecinos cercanos de la instancia x nos genere una instancia sintética. Esta instancia sintética, tendra para cada variable, valores comprendidos entre el valor minimo y maximo de esa variable en la instancia x y uno de sus vecinos, que será escogido aleatoriamente.
+
+
 ```{r}
 syntheticInstance <- function(x, neighbors, data)
 { 
-  sample()
+ instancia <- vector()  
+ #Obtenemos un vecino de manera aleatoria y su indice  
+ vecino <- neighbors[sample(1:length(neighbors),1)]
+ indice <- as.integer(names(vecino)) 
+ #Para cada variable (sin ser la clase) en la dimension del conjunto de datos
+ variables<-dim(data)[2]
+ for(i in 1:variables-1)
+ {
+   #Obtenemos su máximo y su mínimo entre la muestra x y su vecino aleatorio 
+   minimo   <- suppressWarnings(min(as.numeric(data[x,i]), as.numeric(data[indice,i])))
+   maximo   <- suppressWarnings(max(as.numeric(data[x,i]), as.numeric(data[indice,i])))
+   #Con ese máximo y minimo obtememos un valor aleatorio entre la línea de ambas
+   instancia[i] <- suppressWarnings(runif(1,min = minimo, max=maximo))
+   #En instancia[i], tenemos el valor de la variable i para la instancia sintetica
+ }
+ return(instancia)
 }
 ```
+
+Ahora que tenemos las funciones hechas, realiazmos el entrenamiento del SMOTE con knn. Para ello, para cada k del K-FCV, generaremos el número de instancias aleatorias que tendremos que generar de la clase minoritaria para igualar la mayoritaria y para cada una de estos generamos una muestra sintética. Vamos a comprar el resultado de esta técnica con los métodos anteriores. Comenzamos con el dataset, **subclus**. 
+
+
+```{r}
+pos <- (1:dim(subclus)[1])[subclus$Class==0]
+neg <- (1:dim(subclus)[1])[subclus$Class==1]
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+knn.pred = NULL
+
+for( i in 1:5){
+  
+  train <- subclus[-CVperm[,i], -3]
+  classes.train <- subclus[-CVperm[,i], 3] 
+  test  <- subclus[CVperm[,i], -3]
+  
+  #SMOTE
+  minority.indices <- (1:dim(train)[1])[classes.train == 0]
+  to.add <- dim(train)[1] - 2 * length(minority.indices)
+  duplicate <- sample(minority.indices, to.add, replace = T)
+  
+  for( j in 1:length(duplicate))
+  {
+    vecinos <- getNeighbors(duplicate[j],minority.indices, train,5)
+    instancia <- syntheticInstance(duplicate[j],vecinos, train)
+    train <- rbind(train, instancia)
+    classes.train <- c(classes.train, 0)
+  }  
+  # use the modified training set to make predictions
+  predictions <-  knn(train, test, classes.train, k = 3)
+  knn.pred <- c(knn.pred, predictions)
+}
+
+tpr.SMOTE <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
+tnr.SMOTE <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
+gmean.SMOTE <- sqrt(tpr.SMOTE * tnr.SMOTE)
+gmean.SMOTE
+```
+
+El resultado es 0.5381386 frente a  0.5690342 que nos proporcionaba el resultado aleatorio. Vamos a obtener la representación gráfica de las muestras para ver si podemos obtener información de que está pasando.
+
+
+```{r}
+subclus.SMOTE <- subclus[,-3]
+classes.subclus.SMOTE <- subclus[, 3] 
+
+minority.indices <- (1:dim(subclus.SMOTE)[1])[classes.subclus.SMOTE  == 0]
+to.add <- dim(subclus.SMOTE)[1] - 2 * length(minority.indices)
+duplicate <- sample(minority.indices, to.add, replace = T)
+
+for( j in 1:length(duplicate)){
+    vecinos <- getNeighbors(duplicate[j],minority.indices, subclus.SMOTE,5)
+    instancia <- syntheticInstance(duplicate[j],vecinos, subclus.SMOTE)
+    subclus.SMOTE <- rbind(subclus.SMOTE, instancia)
+    classes.subclus.SMOTE <- c(classes.subclus.SMOTE, 0)
+}  
+
+subclus.SMOTE<-cbind(subclus.SMOTE, Class=classes.subclus.SMOTE)
+
+plot(subclus.SMOTE$V1, subclus.SMOTE$V2)
+points(subclus.SMOTE[subclus.SMOTE$Class==0,1],subclus.SMOTE[subclus.SMOTE$Class==0,2],col="red")
+points(subclus.SMOTE[subclus.SMOTE$Class==1,1],subclus.SMOTE[subclus.SMOTE$Class==1,2],col="blue") 
+```
+
+```{r}
+circle.SMOTE <- circle[,-3]
+classes.circle.SMOTE <- circle[, 3] 
+
+minority.indices <- (1:dim(circle.SMOTE)[1])[classes.circle.SMOTE  == 0]
+to.add <- dim(circle.SMOTE)[1] - 2 * length(minority.indices)
+duplicate <- sample(minority.indices, to.add, replace = T)
+
+for( j in 1:length(duplicate))
+{
+    vecinos <- getNeighbors(duplicate[j],minority.indices, circle.SMOTE,5)
+    instancia <- syntheticInstance(duplicate[j],vecinos, circle.SMOTE)
+    circle.SMOTE <- rbind(circle.SMOTE, instancia)
+    classes.circle.SMOTE <- c(classes.circle.SMOTE, 0)
+}  
+
+circle.SMOTE<-cbind(circle.SMOTE, Class=classes.circle.SMOTE)
+plot(circle.SMOTE$V1, circle.SMOTE$V2)
+points(circle.SMOTE[circle.SMOTE$Class==0,1],circle.SMOTE[circle.SMOTE$Class==0,2],col="red")
+points(circle.SMOTE[circle.SMOTE$Class==1,1],circle.SMOTE[circle.SMOTE$Class==1,2],col="blue") 
+```
+
+
+Vemos que aunque las variables se generan en el área apropiada, estas no se distribuyen aleatoriamente por el espacio, lo que puede indicar que hay algun problema en nuestras funciones. Vamos a pasar a utilizar el paquete umbalance, donde encontramos ya estos métodos implementados de manera correcta. 
+
+
+
+
