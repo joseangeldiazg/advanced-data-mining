@@ -66,6 +66,7 @@ acc <- sum((subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1)
 tpr <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
 tnr <- sum(subclus$Class[as.vector(CVperm)] == 1 & knn.pred == 2) / nClass1
 gmean <- sqrt(tpr * tnr)
+gmean
 ```
 
 Acorde a la premisa que hemos postulado antes, el algoritmo knn se comporta bien aunque seguramente tras un proceso previo de pre-procesado podramos obtener mejores resultados. Vamos a realizar ahora los mismos pasos sobre el dataset **circle**.
@@ -128,6 +129,15 @@ La idea de esta técnica es en la de generar muestras aleatorias de la clase min
 
 ```{r}
 knn.pred = NULL
+
+pos <- (1:dim(subclus)[1])[subclus$Class==0]
+neg <- (1:dim(subclus)[1])[subclus$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
 for( i in 1:5){
   
   train <- subclus[-CVperm[,i], -3]
@@ -141,10 +151,10 @@ for( i in 1:5){
   for( j in 1:length(duplicate)){
     train <- rbind(train, train[duplicate[j],])
     classes.train <- c(classes.train, 0)
-  }  
+  } 
   
   # use the modified training set to make predictions
-  predictions <-  knn(train, test, classes.train, k = 3)
+  predictions <-  class::knn(train, test, classes.train, k = 3)
   knn.pred <- c(knn.pred, predictions)
 }
 tpr.ROS <- sum(subclus$Class[as.vector(CVperm)] == 0 & knn.pred == 1) / nClass0
@@ -158,6 +168,14 @@ Vemos que el resultado de gmean, se reduce en cierta medida frente al anterior r
 
 
 ```{r}
+pos <- (1:dim(circle)[1])[circle$Class==0]
+neg <- (1:dim(circle)[1])[circle$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
 knn.pred = NULL
 for( i in 1:5){
   
@@ -184,8 +202,8 @@ gmean.ROS <- sqrt(tpr.ROS * tnr.ROS)
 gmean.ROS
 ```
 
-El resultado aquí es muy malo, incluso peor que la clasificación aleatoria, lo que nos indica que deberemos mejorar mucho el modelo y que hay solapamiento entre las fronteras del circulo interior y el las muestras mayoritarias del exterior.
 
+Hemos mejorado el resultado anterior, lo que indica que aún con una solución muy sencilla estamos mejorando los resultados. 
 
 ### Random Undersampling
 
@@ -194,6 +212,16 @@ El Random Oversampling, elimina tantas muestras aleatorias como para igualar la 
 
 ```{r}
 knn.pred = NULL
+
+pos <- (1:dim(subclus)[1])[subclus$Class==0]
+neg <- (1:dim(subclus)[1])[subclus$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
+
 for( i in 1:5){
   
   train <- subclus[-CVperm[,i], -3]
@@ -228,7 +256,7 @@ to.remove <- 2 * length(majority.indices) - dim(subclus.RUS)[1]
 remove <- sample(majority.indices, to.remove, replace = F)
 subclus.RUS <- subclus.RUS[-remove,] 
 
-plot(subclus.RUS$V1, subclus.RUS$V2)
+plot(subclus.RUS$Att1, subclus.RUS$Att2)
 points(subclus.RUS[subclus.RUS$Class==0,1],subclus.RUS[subclus.RUS$Class==0,2],col="red")
 points(subclus.RUS[subclus.RUS$Class==1,1],subclus.RUS[subclus.RUS$Class==1,2],col="blue") 
 ```
@@ -239,6 +267,15 @@ Vamos a probar la misma solución con el dataset Circle.
 
 ```{r}
 knn.pred = NULL
+
+pos <- (1:dim(circle)[1])[circle$Class==0]
+neg <- (1:dim(circle)[1])[circle$Class==1]
+
+CVperm_pos <- matrix(sample(pos,length(pos)), ncol=5, byrow=T)
+CVperm_neg <- matrix(sample(neg,length(neg)), ncol=5, byrow=T)
+
+CVperm <- rbind(CVperm_pos, CVperm_neg)
+
 for( i in 1:5){
   
   train <- circle[-CVperm[,i], -3]
@@ -279,12 +316,12 @@ points(circle.RUS[circle.RUS$Class==0,1],circle.RUS[circle.RUS$Class==0,2],col="
 points(circle.RUS[circle.RUS$Class==1,1],circle.RUS[circle.RUS$Class==1,2],col="blue") 
 ```
 
-En este caso, el problema incluso se acentua, ya que hemos perdido mucha información al respecto. 
+En este caso, aunque los resultados son buenos, tenemos una gran perdida de datos que podría llegar a ser un factor a tener en cuenta en análisis posteriores. 
 
 
 ### SMOTE 
 
-En esta seccion implementaremos las funciones necesarias para construir el método SMOTE (Synthetic Minority Oversampling Technique). Esta funcion se basa en la distancia por lo que haremos uso de la siguiente función:
+En esta sección implementaremos las funciones necesarias para construir el método SMOTE (Synthetic Minority Oversampling Technique). Esta función se basa en la distancia por lo que haremos uso de la siguiente función:
 
 
 ```{r}
@@ -305,7 +342,7 @@ distance <- function(i, j, data){
 ```
 
 
-Vamos a implementar una función **getNeighbors**, que dado un ejemplo x de la clase minoritaria, las muestras minoritarias de esa clase, el dataset de train y un valor de k, calcula los k vecinos más cercanos a la intancia x, usando para ello la funcion de distancia vista anteriormente.  
+Vamos a implementar una función **getNeighbors**, que dado un ejemplo x de la clase minoritaria, las muestras minoritarias de esa clase, el dataset de train y un valor de k, calcula los k vecinos más cercanos a la intancia x, usando para ello la función de distancia vista anteriormente.  
 
 
 ```{r}
@@ -320,7 +357,8 @@ getNeighbors <- function(x, minority.instances, train,k)
     #Si el elemento es distinto a el mismo 
     if(x != minority.instances[i])
     {
-      #calculamos la distancia de ese elemento con el otro de la muestra minoritaria y añadimos su indice como nombre
+      #calculamos la distancia de ese elemento con el otro de la
+      #muestra minoritaria y añadimos su indice como nombre
       salida[i]<-distance(x,minority.instances[i],train)
       indices[i]<-as.character(minority.instances[i])
     }
@@ -424,10 +462,17 @@ for( j in 1:length(duplicate)){
 
 subclus.SMOTE<-cbind(subclus.SMOTE, Class=classes.subclus.SMOTE)
 
-plot(subclus.SMOTE$V1, subclus.SMOTE$V2)
-points(subclus.SMOTE[subclus.SMOTE$Class==0,1],subclus.SMOTE[subclus.SMOTE$Class==0,2],col="red")
-points(subclus.SMOTE[subclus.SMOTE$Class==1,1],subclus.SMOTE[subclus.SMOTE$Class==1,2],col="blue") 
+plot(subclus.SMOTE$Att1, subclus.SMOTE$Att2)
+
+points(subclus.SMOTE[subclus.SMOTE$Class==0,1],
+       subclus.SMOTE[subclus.SMOTE$Class==0,2],col="red")
+
+points(subclus.SMOTE[subclus.SMOTE$Class==1,1],
+       subclus.SMOTE[subclus.SMOTE$Class==1,2],col="blue") 
 ```
+
+
+Vamos a probar ahora con el dataset circle:
 
 ```{r}
 circle.SMOTE <- circle[,-3]
@@ -452,8 +497,93 @@ points(circle.SMOTE[circle.SMOTE$Class==1,1],circle.SMOTE[circle.SMOTE$Class==1,
 ```
 
 
-Vemos que aunque las variables se generan en el área apropiada, estas no se distribuyen aleatoriamente por el espacio, lo que puede indicar que hay algun problema en nuestras funciones. Vamos a pasar a utilizar el paquete umbalance, donde encontramos ya estos métodos implementados de manera correcta. 
+Vemos que aunque las variables se generan en el área apropiada, estas no se distribuyen aleatoriamente por el espacio, lo que puede indicar que hay algun problema en nuestras funciones. Vamos a pasar a utilizar el paquete **unbalance**, donde encontramos ya estos métodos implementados de manera correcta. 
 
 
+##  Paquete ‘unbalanced’ y combinación de técnicas
+
+El paquete unbalanced, ademÁs de incluir técnicas como el smote, incluye técnicas combinadas. Utilizando el paquete ‘unbalanced’, se pide combinar dos técnicas de undersampling con SMOTE. La primera de ellas será la combinación SMOTE + TomekLinks y la segunda será SMOTE + ENN. Para ello, usa las funciones ubSMOTE, ubENN y ubTomek.
+
+
+Vamos a comenzar a ver el comportamiento de los tres métodos introducidos anteriormente, con el dataset **subclus**.
+
+```{r}
+require(unbalanced)
+
+#Cambiamos las clases ya que smote funcioa con minoritaria 1 y mayoritaria 0
+smoteSubclus <- subclus
+smoteSubclus$Class <- ifelse(smoteSubclus$Class==1, 0, 1)
+
+#Pasamos a factor, ya que el método espera un factor en la clase
+smoteSubclus$Class <- as.factor(smoteSubclus$Class)
+
+smoteVariables <- ubSMOTE(smoteSubclus[,-3], smoteSubclus$Class, perc.over = 400, k = 5)
+smoteSubclus<- cbind(smoteVariables$X, Class=as.integer(as.character(smoteVariables$Y)))
+smoteSubclus$Class <- ifelse(smoteSubclus$Class==0, 1, 0)
+
+table(smoteSubclus$Class)
+table(subclus$Class)
+
+
+# Visualizamos la generación
+
+plot(smoteSubclus$Att1, smoteSubclus$Att2)
+points(smoteSubclus[smoteSubclus$Class==0,1],smoteSubclus[smoteSubclus$Class==0,2],col="red")
+points(smoteSubclus[smoteSubclus$Class==1,1],smoteSubclus[smoteSubclus$Class==1,2],col="blue") 
+```
+
+Ahora realizamos las mismas operaciones pero para las técicas combinadas. Comenzamos con el ENN
+
+
+```{r}
+#Cambiamos las clases ya que smote funcioa con minoritaria 1 y mayoritaria 0
+smoteEnnSubclus <- subclus
+smoteEnnSubclus$Class <- ifelse(smoteEnnSubclus$Class==1, 0, 1)
+
+#Pasamos a factor, ya que el método espera un factor en la clase
+smoteEnnSubclus$Class <- as.factor(smoteEnnSubclus$Class)
+
+smoteVariables <- ubENN(smoteEnnSubclus[,-3], smoteEnnSubclus$Class, k = 3)
+smoteEnnSubclus<- cbind(smoteVariables$X, Class=as.integer(as.character(smoteVariables$Y)))
+smoteEnnSubclus$Class <- ifelse(smoteEnnSubclus$Class==0, 1, 0)
+
+table(smoteEnnSubclus$Class)
+table(subclus$Class)
+
+
+plot(smoteEnnSubclus$Att1, smoteEnnSubclus$Att2)
+points(smoteEnnSubclus[smoteEnnSubclus$Class==0,1],
+       smoteEnnSubclus[smoteEnnSubclus$Class==0,2],col="red")
+points(smoteEnnSubclus[smoteEnnSubclus$Class==1,1],
+       smoteEnnSubclus[smoteEnnSubclus$Class==1,2],col="blue") 
+```
+
+Y finalizamos con el Tomek:
+
+```{r}
+#Cambiamos las clases ya que smote funcioa con minoritaria 1 y mayoritaria 0
+smoteTomekSubclus <- subclus
+smoteTomekSubclus$Class <- ifelse(smoteTomekSubclus$Class==1, 0, 1)
+
+#Pasamos a factor, ya que el método espera un factor en la clase
+smoteTomekSubclus$Class <- as.factor(smoteTomekSubclus$Class)
+
+smoteVariables <- ubTomek(smoteTomekSubclus[,-3], smoteTomekSubclus$Class)
+smoteTomekSubclus<- cbind(smoteVariables$X, Class=as.integer(as.character(smoteVariables$Y)))
+smoteTomekSubclus$Class <- ifelse(smoteTomekSubclus$Class==0, 1, 0)
+
+table(smoteTomekSubclus$Class)
+table(subclus$Class)
+
+#Visualizamos
+
+plot(smoteTomekSubclus$Att1, smoteTomekSubclus$Att2)
+points(smoteTomekSubclus[smoteTomekSubclus$Class==0,1],
+       smoteTomekSubclus[smoteTomekSubclus$Class==0,2],col="red")
+points(smoteTomekSubclus[smoteTomekSubclus$Class==1,1],
+      smoteTomekSubclus[smoteTomekSubclus$Class==1,2],col="blue") 
+```
+
+Si atendemos a los resultados, smote genera instancias nuevas aleatorias en el área de la clase minoritaria. knn, parece no haber conseguido generar nuevas en función de los más cercanos por lo que el método puede tener algún problema seguramente en la entrada de datos o parámetros que le estamos facilitando. Por su parte, tomelinks elimina algunas variables en la frontera.
 
 
