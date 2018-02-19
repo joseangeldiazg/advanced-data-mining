@@ -7,8 +7,7 @@ output: pdf_document
 
 ## Clasificación ordinal
 
-Se pide adaptar el proceso de modelos múltiples de clasificación ordinal al conjunto de datos esl con el algoritmo J48 (C4.5). Para ello, se considerará una
-única partición entrenamiento test aleatoria con 100 ejemplos en el conjunto de test. Este conjunto tiene carácter ordinal y dispone de 9 clases [1, 9]. Una vez generados los modelos desde el conjunto de entrenamiento, habrá que clasificar los 100 ejemplos de test usando la cascada de probabilidades que define el modelo múltiple. 
+Se pide adaptar el proceso de modelos múltiples de clasificación ordinal al conjunto de datos esl con el algoritmo J48 (C4.5). Para ello, se considerará una única partición entrenamiento test aleatoria con 100 ejemplos en el conjunto de test. Este conjunto tiene carácter ordinal y dispone de 9 clases [1, 9]. Una vez generados los modelos desde el conjunto de entrenamiento, habrá que clasificar los 100 ejemplos de test usando la cascada de probabilidades que define el modelo múltiple. 
 
 
 ### Librerias
@@ -32,7 +31,7 @@ Tras esto construimos los conjuntos de test y training.
 
 ```{r}
 set.seed (2)
-train=sample (1:nrow(esl), 100)
+train=sample(1:nrow(esl), 350)
 test=esl[-train ,]
 ```
 
@@ -56,14 +55,14 @@ data8 <- esl
 2- Utilizamos la función **ifelse** para cambiar las clases de los datasets:
 
 ```{r}
-data1$out1 <- ifelse(data1$out1==1, 1, 0) 
-data2$out1 <- ifelse(data2$out1==2, 1, 0) 
-data3$out1 <- ifelse(data3$out1==3, 1, 0) 
-data4$out1 <- ifelse(data4$out1==4, 1, 0) 
-data5$out1 <- ifelse(data5$out1==5, 1, 0) 
-data6$out1 <- ifelse(data6$out1==6, 1, 0) 
-data7$out1 <- ifelse(data7$out1==7, 1, 0) 
-data8$out1 <- ifelse(data8$out1==8, 1, 0) 
+data1$out1 <- ifelse(data1$out1>1, 1, 0) 
+data2$out1 <- ifelse(data2$out1>2, 1, 0) 
+data3$out1 <- ifelse(data3$out1>3, 1, 0) 
+data4$out1 <- ifelse(data4$out1>4, 1, 0) 
+data5$out1 <- ifelse(data5$out1>5, 1, 0) 
+data6$out1 <- ifelse(data6$out1>6, 1, 0) 
+data7$out1 <- ifelse(data7$out1>7, 1, 0) 
+data8$out1 <- ifelse(data8$out1>8, 1, 0) 
 ```
 
 3- Pasamos la clase a factor:
@@ -145,25 +144,48 @@ ordinalClassification <- function (df, classcol, testData)
 {
   #Obtenemos el número de clase del problema:
   clases<-as.integer(unique(df[,classcol]))
-  salida<-1:length(testData[,2])
-  
-  for(i in 2:length(clases)-1)
+  #Creamos un vector del tamaño de test para contener las probabilidades
+  prob<-1:length(testData[,2])
+  #Para cada clase menos la última
+  for(i in 1:(length(clases)-1))
   {
+    #copiamos los datos 
     dataActual <- df
-    dataActual[,classcol] <- ifelse(dataActual[,classcol]==i, 1, 0) 
+    #creamos el dataset intermedio cambiando las clases en funcion del orden
+    dataActual[,classcol] <- ifelse(dataActual[,classcol]>i, 1, 0) 
     dataActual[,classcol] <- as.factor(dataActual[,classcol])
-    print(dataActual[,classcol])
     #Ya tenemos un dataset ahora creamos el modelo y obtenemos la probabilidad para este modelo
-    
-    m <- J48(dataActual[,classcol]~ ., data = dataActual)
+    colnames(dataActual)[classcol]<-"class"
+    m <- J48(class~ ., data = dataActual)
     pred <- predict(m,testData,type="probability")
-    print(pred)
     pred <- as.data.frame(pred)
-    salida<-cbind(salida,pred$`1`)
+    prob<-cbind(prob,pred$`1`)
   }
-  return(salida)
+  salida<-prob
+  #Calculamos las probabilidades ordinales
+  for(i in 2:(length(clases)))
+  {
+    salida[,i]<-prob[,(i-1)]*(1-prob[,i])
+    salida[,1]<-(1-prob[,1])
+    salida[,length(clases)]<-prob[,(length(clases)-1)]
+  }
+  
+  #Eliminamos el id
+  salida<-salida[,-1]
+  #Nos quedamos con el indice de la columna que tiene el mayor elemento
+  return(apply(salida,1,which.max))
+  #return(salida)
 }
-probabilidades<-ordinalClassification(esl,5, testData=test)
-
-names(data1[,5])
+#salida<-ordinalClassification(esl,5, testData=test)
+pred<-ordinalClassification(esl,5, testData=test)
 ```
+
+Por último obtenemos el accuracy del modelo:
+
+```{r}
+accuracy <- sum(pred==test$out1)/length(test$out1)
+accuracy
+```
+
+
+Vemos que hemos obtenido casi un 80% de acierto, lo que es un buen resultado y constata la potencia del método a pesar de que la implementación del mismo no es la mejor posible. 
