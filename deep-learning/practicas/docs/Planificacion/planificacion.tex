@@ -1,0 +1,49 @@
+%---------------------------------------------------
+% Nombre: capitulo1.tex  
+% 
+% Texto del capitulo 1
+%---------------------------------------------------
+
+\chapter{Planificación}
+
+En este capítulo se detallan los enfoques de deep learning usados durante el transcurso de la competición así como la metodología de trabajo y desarrollo llevada a cabo por el equipo durante el transcurso de la práctica para favorecer mejores resultados y sobre todo optimizar tiempos. 
+
+\section{Metodologías de Deep Learning}
+\label{meto}
+Dado que el equipo estaba formado por tres componentes se dividieron las directrices del mismo en las tres vertientes más estudiadas dentro de deep-learning:
+
+\begin{enumerate}
+\item \textbf{From Scratch}: Esta técnica consiste en crear y entrenar una red neuronal desde 0. En casos como el que nos encontramos, tendremos el problema de que hay una muestra muy pequeña de datos para el entrenamiento por lo que habrá que utilizar data augmentation para favorecer su mejora. 
+\item \textbf{Transfer Learning}: Esta técnica, se basa en utilizar redes ya entrenadas para clasificar un nuevo problema. Si el dominio del problema no es muy diferente a las imágenes usadas para entrenar la red inicial, puede que los resultados sean aceptables y tiempos de entrenamiento nulos si por otro lado, estamos en problemas muy especiales como casos médicos esta opción no debe ni ser contemplada. En nuestro caso, al ser objetos comunes del mundo real si que la hemos contemplado. 
+\item \textbf{Fine Tunning}: Esta es la técnica que mejores resultados ha ofrecido en la competición permitiendo usar tipologías potentes y que son o han sido estado del arte en clasificación de imágenes. La idea de esta metodología reside en utilizar las primeras capas de redes ya entrenadas las cuales almacenan datos de curvas y aristas en gran medida y tras ello, se entrenan las ultimas capas con las imágenes de nuestro problema tras lo cual los resultados serán bastante buenos o aceptables. 
+\end{enumerate}
+
+\section{Planificación temporal}
+
+El proyecto ha sido planificado temporalmente acorde a los siguientes puntos, tareas u objetivos:
+
+\begin{itemize}
+
+\item \textbf{Pruebas con modelos individuales}: En los primeros días cada uno de los miembros del equipo estudió una de las metodologías vistas en el punto \ref{meto}. Se hicieron las primeras subidas a Kaggle.  
+\item \textbf{Preprocesado}: Una vez se dio con la metodología a seguir, fine tunning, se estudiaron y variaron ciertas variantes del pre-procesado para obtener mejores resultados. 
+\item \textbf{Estudio de mejores modelos}: Se estudio el estado del arte en la materia para adaptar al proceso de fine tunning modelos cuya potencia estuviera ya constatada. 
+\item \textbf{Reuniones de grupo}: Reuniones de puesta en común de resultados y debate de técnicas y vías de estudio. 
+\item \textbf{Redacción}: Tras la finalización de la competición se abre un período de redacción del presente documento. 
+\end{itemize}
+
+En la figura \ref{planificacion}, puede verse un croquis sobre el calendario del mes de marzo, en el que se detallan las distintas tareas que se han detallado en puntos anteriores.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=12cm]{./Planificacion/imagenes/plani.png}
+\caption{Croquis de la planificación seguida.}
+\label{planificacion}
+\end{figure} 
+
+\section{Desarrollo}
+
+Para el desarrollo del código se ha usado un repositorio para el control de versiones en GitHub que puede verse en \cite{github}. En este hemos creado ramas para cada uno de los miembros del equipo que eran fusionadas al realizar algún avance.
+
+Dado que el proceso de entrenamiento con Keras permite guardar pesos, se ha llevado a cabo un desarrollo basado en \textbf{soluciones intermedias}. Con este método, se guardan los pesos de ciertas redes por lo que otros miembros del equipo por medio del método \textbf{read model} pueden leer estos pesos y utilizarlos para sus experimentos sin necesidad de volver a entrenar modelos ya entrenados. 
+\clearpage
+%---------------------------------------------------

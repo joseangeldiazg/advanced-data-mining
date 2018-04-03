@@ -21,7 +21,7 @@ Esta plataforma, se basa en proponer problemas reales de minería de datos que cu
 \section{Problema y Dataset}
 \label{dataset}
 
-El problema propuesto, es un problema de clasificación binaria de imágenes en el cual deberemos crear un modelo basado en redes neuronales artificiales, capaz de clasificar las imágenes correctamente. Las clases a clasificar son \textbf{armas de fuego} y \textbf{smartphones}. Para entrenar y validar el modelo disponemos de los siguientes datos:
+El problema propuesto, es un problema de clasificación binaria de imágenes \cite{challenge} en el cual deberemos crear un modelo basado en redes neuronales artificiales, capaz de clasificar las imágenes correctamente. Las clases a clasificar son \textbf{armas de fuego} y \textbf{smartphones}. Para entrenar y validar el modelo disponemos de los siguientes datos:
 
 	\begin{itemize}
 		\item \textbf{train}: Tenemos dos carpetas, una con las armas de fuego y otras de smartphones. Concretamente tendremos 392 referentes a armas de fuego y 351 referentes a smartphones. 	
@@ -38,7 +38,49 @@ En esta sección veremos una breve introducción a las herramientas usadas para el
 
 \subsection{Hardware}
 
-Las herramientas hardware usadas han sido los pc personales de cada uno de los miembros del equipo, en los cuales alguno carece de GPU y en los demás no se ha podido configurar correctamente  las mismas por lo que el 100\% del computo ha sido llevado a cabo en CPUs.
+Las herramientas hardware usadas han sido los pc personales de cada uno de los miembros del equipo, en los cuales alguno carece de GPU y en los demás no se ha podido configurar correctamente  las mismas por lo que el 100\% del computo ha sido llevado a cabo en CPUs. Las máquinas usadas pueden verse en las siguientes tablas.
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{cc} \toprule
+		Elemento & Características \\ \midrule
+		Procesador & 2,6 GHz Intel Core i5 \\
+		GPU & - \\
+		Memoria Ram &  8 GB 1600 MHz DDR3 \\
+		Disco duro & SATA SSD de 120 GB\\ \bottomrule
+		\end{tabular}
+	\end{center}
+\caption{Especificaciones técnicas de la máquina 1.}
+\label{ord_personal1}
+\end{table}
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{cc} \toprule
+		Elemento & Características \\ \midrule
+		Procesador & Intel Core i7 6700HQ \\
+		Memoria Ram &  16 GB SDRAM  \\
+		Disco duro & 128GB SSD\\ \bottomrule
+		\end{tabular}
+	\end{center}
+\caption{Especificaciones técnicas de la máquina 2.}
+\label{ord_personal2}
+\end{table}
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{cc} \toprule
+		Elemento & Características \\ \midrule
+		Procesador & Intel Core i7 6700HQ \\
+		Memoria Ram &  16 GB SDRAM  \\
+		Disco duro & 128GB SSD\\ \bottomrule
+		\end{tabular}
+	\end{center}
+\caption{Especificaciones técnicas de la máquina 3.}
+\label{ord_personal3}
+\end{table}
+
+
 \subsection{Software}
 
 El software utilizado es en su práctica totalidad software libre, siendo el restante software propietario cuyas licencias vienen incluidas en el sistema operativo de las máquinas.
@@ -52,7 +94,6 @@ El software utilizado es en su práctica totalidad software libre, siendo el rest
 \subsection{Objetivos}
 
 Los objetivos de este trabajo podrían resumirse en los siguientes:
-
 \begin{itemize}
 	\item Obtener un modelo predictivo fiable que dado una nueva imagen pueda predecir si es un arma o un smartphone.
 	\item Obtener un valor de \textit{accuracy} aceptable para escalar posiciones en la competición de Kaggle. 
@@ -61,8 +102,6 @@ Los objetivos de este trabajo podrían resumirse en los siguientes:
 
 \section{Organización del trabajo} 
 
-La organización del presente documento, se centra en detallar cada uno de los pasos seguidos durante el estudio y resolución del problema planteado en esta introducción. En el capítulo \ref{preprocesado} veremos los scripts y explicaciones asociadas al preprocesado de datos, más concretamente al data augmentation. Finalizaremos las conclusiones y vías futuras que quedan relegadas al capítulo \ref{conclusiones}. 
-
-Los resultados obtenidos en la competición de Kaggle pueden encontrarse en el Anexo de la sección \ref{anexo}.
+La organización del presente documento, se centra en detallar cada uno de los pasos seguidos durante el estudio y resolución del problema planteado en esta introducción, tras la cual en el capítulo \ref{planificacion} veremos la metodología y planificación temporal seguida por el equipo durante el transcurso de la práctica. En el capítulo \ref{preprocesado} veremos las explicaciones asociadas al preprocesado de datos, más concretamente al data augmentation. El grueso de la memoria está en el capítulo \ref{nn} donde trataremos de ver las topologías y el proceso experimental seguido para alcanzar el resultado final. Finalizaremos la memoria con las conclusiones y vías futuras que quedan relegadas al capítulo \ref{conclusiones}. 
 \clearpage
 %---------------------------------------------------
