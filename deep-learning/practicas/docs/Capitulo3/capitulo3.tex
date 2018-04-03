@@ -7,9 +7,21 @@
 \chapter{Clasificación con Redes Neuronales}
 \label{nn}
 
-En este capítulo veremos el proceso seguido y las distintas vertientes de entrenamiento usadas a lo largo de la realización de la práctica. Concretamente veremos los resultados en función de la metodología y  topologías usadas. 
+En este capítulo veremos el proceso seguido y las distintas vertientes de entrenamiento usadas a lo largo de la realización de la práctica. Concretamente veremos los resultados en función de la metodología y topologías usadas. 
 
 \section{From Scratch}
+
+En primera instancia se llevo a cabo una implementación desde 0 de una red convolucional usando la librería para Python, Tensorflow. Este primer modelo estaba formado por una entrada para imágenes de 32x32px,  tras lo cual su topología consistía en un red neuronal formada por 3 capas convolucionales en las que se utilizó RELU como función de activación, seguidas de una capa de pooling para reducir el número de características de las imágenes. Tras ellas, una capa totalmente conectada. Como método de optimización se uso,  AdamOptimizer de gradiente descendente. Con esta topología se obtuvo una puntuación inicial en Kaggle de 0,91729, aunque mediante optimización de parámetros pudo subirse su accuracy en training hasta el 0,9523, tras lo cual indujimos en que el modelo estaba sobreaprendiendo además de perder modelos intermedios aceptables, por lo que para evitar estos problemas y poder usar redes mas complejas de una manera más sencilla migramos el computo y la programación hacia un enfoque basado en Keras, donde además de usar redes neuronales más avanzadas podríamos implementar de manera sencilla un sistema de \textit{early stopping} que nos permitiera parar cuando llegáramos a una tasa de aprendizaje apropiada. 
+
+Mediante Keras se utilizó este mismo modelo de red neuronal CNN descrito anteriormente pero, a la que se añadió dropout, regularización L2 y las técnicas de preprocesado vistas en el capítulo \ref{preprocesado}. También se aplicó normalización a los valores de las imágenes en el rango 0,1, tras lo cual, se alcanzó la puntuación en Kaggle de 0,96741. Para ello, en las capas convolucionales, el número de filtros que se aplicó fue 32 y se utilizaron 128 neuronas en la capa que conecta todos con todos.  Estas técnicas fueron usadas en GPU para agilizar el proceso de computo.  Tras esta mejora, se realizaron numerosas pruebas aumentando el número de capas ocultas hasta 5, modificando el número de filtros de cada capa y el número de neuronas de la capa que conecta a todos. También se llevaron a cabo cambios en la probabilidad con la que se aplicaba dropout, aumentando y disminuyendo el \% pero no se obtuvo mejora alguna. La \textbf{mejor puntuación} obtenida en Kaggle ha sido 0.96992. En este modelo se disminuyó  el número de técnicas de data augmentation y también se redujo y se utilizó un tamaño de image de 64x64 pixeles. 
+
+\section{Fine Tunning}
+
+El fine tunning es una de las tareas más usadas actualmente en deep learning y dado el carácter de formación de la práctica se hizo necesario su estudio y aplicación, al menos para comparar modelos y ver que puede funcionar mejor. Para el fine tunning, nos hemos basado en la libreria de Keras y hemos creado dos modelos usando topologías muy famosas, ambas entrenadas con las imágenes de la base de datos imagenet, por lado \textbf{VGG16} y por otro lado la \textbf{ResNet50}. Sobre estas redes, se cargan sus pesos y se congelan sus primeras capas, aquellas que son usadas por la red neuronal para discernir entre formas geométricas, aristas y curvas, con estas capas entrenadas pasamos nuestro conjunto de entrenamiento y sesgamos la salida y la entrada a el número de clases de deseadas, en nuestro caso 2 y al tamaño de imagen de entrada respectivamente. 
+
+Con este modelo, al no contar con la posibilidad de GPU al ser el sistema hardware Mac, se obtuvieron buenos resultados pero los tiempos de entrenamiento fueron muy elevados. El mejor resultado con esta solución estuvo en el orden de 0.95 de accuracy en test, con una red neuronal de topología ResNet50 y 300 épocas de aprendizaje. 
+
+Una de las mejoras de este punto, estuvo en la generación del código para guardar resultados intermedios de los pesos de la red en caso de que estos mejoraran los resultados en etapas anteriores. Con esta estrategia de \textit{checkpoints} o \textit{early stopping}, nos aseguramos que  con un elevado número de épocas obtendremos resultados aceptables en la mayoría de los casos. 
 
 \section{Transfer Learning}
 
@@ -42,8 +54,6 @@ Los resultados obtenidos por este modelo de procesado son aceptables en imágenes
 	\label{3}
 \end{figure} 
 
-
-\section{Fine Tunning}
 
 \pagebreak
 \clearpage
