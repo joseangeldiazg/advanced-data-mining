@@ -6,28 +6,26 @@
 
 \chapter{Conclusiones y vías futuras}
 \label{conclusiones}
-En este capítulo final se estudian los resultados obtenidos a lo largo del trabajo y vías futuras para aumentar aún más el accuracy. También se complementan las conclusiones que se han ido obteniendo a lo largo del trabajo.
+
+En este capítulo final se estudian los resultados obtenidos a lo largo del trabajo y así como las vías futuras para aumentar aún más el accuracy. También se complementan las conclusiones que se han ido obteniendo a lo largo del trabajo.
 
 \section{Vías futuras}
 
-
 Respecto a las vías futuras, pese a que algunas ya han sido comentadas a lo largo de la memoria, cabe reunirlas en este último capítulo. 
 
-Principalmente, destacar la necesidad de disponer de máquinas más potentes a la hora de procesar esta gran cantidad de imágenes para poder disponer de todo el dataset sin necesidad de redimensionar y por consiguiente perdida de calidad. 
+Principalmente, destacar la necesidad de disponer de máquinas más potentes o al menos con capacidad de procesado con GPU a la hora de procesar esta gran cantidad de imágenes con redes neuronales para poder ademas de mejorar los tiempos de ejecución, poder tener las imágenes con tamaños completos sin perdida de calidad. 
 
 Respecto a las mejoras en la implementación, ensembles de diversas topologías de redes neuronales con \textit{fine tunning} y prevención del \textit{overfitting} serían muy probablemente la mejor opción para atacar el problema. Estas soluciones han sido estudiadas en la literatura \cite{ensembles} pero no hemos conseguido implementarlas ya que son complejas y aún residen casi en su totalidad en el ámbito de investigación de las mismas. 
 
-
 \section{Conclusiones finales}
 
-Como conclusión que aúna todas las demás podemos concluir que el problema era complejo y extenso. Se pedían probar un gran número de técnicas y además conseguir buenos resultados en la competición, con lo cual, esto ha causado que se haya entrado por encima en algunas de las mismas con el fin de profundizar más en otras que a priori puedan parecer mejores. 
+Como conclusión que aúna todas las demás podemos concluir que el problema era ciertamente complejo, y aunque permitia buenos resultados rápidamente mejorarlos iba subiendo en dificultad. Las redes neuronales y el deep learning pone a nuestra disposición una gran cantidad de técnicas (fine tunning, transfer learning?) que han sido descritas a lo largo de la memoria y las cuales se han intentado probar a modo experimental. Si sumamos esto a la necesidad de  conseguir buenos resultados en la competición, creemos que el tiempo asignado para dicha práctica debería de haber sido algo más extenso lo que habría facilitado aún más la asimilación de los conceptos de la asignatura. 
 
-Respecto a las características del problema, muchas de las soluciones vistas en clase no ofrecían buenos resultados llegando incluso algunas a no poder ejecutarse por falta de memoria, como MXNET que podia utilizar poco mas de 1GB de imágenes. Por tanto, un problema que necesita de poder procesar una gran cantidad de imágenes, donde las herramientas disponibles para su procesado son tan limitadas (ordenadores personales), difícilmente podrá obtener buenos resultados.
+Respecto a las características del problema, muchas de las soluciones vistas no ofrecían buenos resultados llegando incluso algunas a no poder ejecutarse por falta de memoria. Por tanto, un problema que necesita de poder procesar imágenes, donde las herramientas disponibles para su procesado son tan limitadas (ordenadores personales), difícilmente podrá obtener buenos resultados, o al menos no todos los buenos resultados que podrían alcanzarse con equipos más potentes por lo que el sesgo entre soluciones que hayan podido hacer uso de GPU y otras que no, es elevado.
 
 Por otro lado, cabe destacar la potencia de las librerías de deep learning, para este tipo de problemas. Con muy poco código y con conocimientos de programación básicos, se pueden lograr grandes resultados, aunque llegar a utilizar estas herramientas nivel experto puede llegar a ser una ardua labor. 
 
-Para finalizar las conclusiones, queremos profundizar un poco en lo trascendental del problema. Estamos trabajando con datos de pacientes médicos en los que una buena solución de machine learning puede suponer salvar vidas, constatando por tanto la importancia que la ciencia de datos está tomando en la totalidad de sectores  trascendiendo en algunos casos, como este mismo, de lo meramente informático u económico-empresarial.   
-
+Para finalizar las conclusiones, queremos profundizar un poco en lo trascendental del problema. Estamos trabajando con datos reales de identificación de armas y su comparación con otros objetos similares como puede ser el caso de smartphones. La potencia y uso de problemas reales del ámbito de la seguridad ha quedado constatada como es el caso del estudio de Olmos, Tabik y Herrera \cite{guns} que ha recibido prestigiosos premios internacionales y constata la necesidad de estas soluciones en la sociedad actual. 
 \pagebreak
 \clearpage
 %---------------------------------------------------
