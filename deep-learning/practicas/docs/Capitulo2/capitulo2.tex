@@ -1,0 +1,30 @@
+%---------------------------------------------------
+% Nombre: capitulo2.tex  
+% 
+% Texto del capítulo 2
+%---------------------------------------------------
+
+\chapter{Preprocesado}
+
+\label{preprocesado}
+
+En este capítulo enunciaremos el proceso de preprocesado llevado a cabo durante la realización de la práctica.
+
+\section{Resize data}
+
+Uno de los problemas que más nos hemos encontrado en la realización de la práctica es la dimensión de los datos, ya que las imágenes cambian de forma y dimensiones por lo que en función del modelo de red neuronal usado aplicaremos una u otra transformación 
+
+\begin{figure}[H]
+	\centering
+		\includegraphics[scale=0.4]{./Capitulo2/imagenes/resize.png}
+		\caption{Deformación de la imagen al redimensionar.}
+	\label{resize}
+\end{figure} 
+
+\section{Data Aumentation}
+\label{aumentation}
+Uno de los principales problemas en \textit{deep learning} es la falta de datos. Para ello, pueden usarse técnicas de \textit{data aumentation} que consisten en aplicar ligeras transformaciones a las imágenes para conseguir un conjunto de entrenamiento mayor, pudiendo obtener de una sola imagen 5 o 6 variaciones que enriquecen enormemente el modelo. Para ello, usando las funciones propias de Keras hemos aplicado las siguientes transformaciones a las imágenes:
+
+\pagebreak
+\clearpage
+%---------------------------------------------------

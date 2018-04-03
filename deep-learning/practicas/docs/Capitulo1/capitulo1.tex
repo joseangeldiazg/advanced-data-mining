@@ -1,0 +1,68 @@
+%---------------------------------------------------
+% Nombre: capitulo1.tex  
+% 
+% Texto del capitulo 1
+%---------------------------------------------------
+
+\chapter{Introducción}
+
+Este documento presenta la memoria del trabajo realizado para la resolución de la práctica final de la asignatura `Minería de datos, aspectos avanzados', enmarcada dentro del Máster en Ciencia de Datos de la universidad de Granada. 
+
+\section{Motivación}
+
+La reciente incursión de las técnicas de minería de datos en actividades cotidianas o diarias constatando sus innumerables aplicaciones en diversos dominios o problemas, han propiciado que de en año en año sean más los profesionales de sectores muy dispares que deciden formarse en estas tareas que les lleven a ostentar en un futuro próximo el título de científicos de datos.
+
+A caballo entre la minería de datos y la inteligencia artificial ha resurgido la idea de simular el comportamiento de la mente humana gracias al deep learning. El deep learning es un subconjunto dentro del match learning, que intenta llevar a la computación la idea de aprendizaje desde el ejemplo. La idea consiste en obtener un modelo para probar ejemplos y un conjunto de reglas para modificar el modelo en el caso que se produzca un error. Para llevar a cabo este proceso se utilizan redes neuronales.
+
+Este creciente interés ha propiciado también un caldo de cultivo perfecto para diversas plataformas online que ayudan a estos profesionales en su proceso de formación siendo una de las plataformas más conocidas Kaggle.
+
+Esta plataforma, se basa en proponer problemas reales de minería de datos que cualquier persona interesada en la temática puede intentar resolver, en muchos casos sin grandes necesidades de cómputo o máquinas potentes. Esta plataforma evalúa los resultados  aportados por cada participante y evalúa un ranking en función de diversas medidas de bondad, lo que la ha convertido también en una herramienta esencial entre los docentes del ámbito de la ciencia de datos que la usan para enfrentar a sus alumnos con problemas reales de ciencia de datos. Esta memoria, se centra por tanto en detallar el proceso llevado a cabo por los autores para resolver un problema propuesto por los profesores de la asignatura en la plataforma Kaggle. El problema en cuestión, será definido en la siguiente sección.
+
+\section{Problema y Dataset}
+\label{dataset}
+
+El problema propuesto, es un problema de clasificación binaria de imágenes en el cual deberemos crear un modelo basado en redes neuronales artificiales, capaz de clasificar las imágenes correctamente. Las clases a clasificar son \textbf{armas de fuego} y \textbf{smartphones}. Para entrenar y validar el modelo disponemos de los siguientes datos:
+
+	\begin{itemize}
+		\item \textbf{train}: Tenemos dos carpetas, una con las armas de fuego y otras de smartphones. Concretamente tendremos 392 referentes a armas de fuego y 351 referentes a smartphones. 	
+		\item \textbf{test}: 800 ítems mezclados de ambas clases a clasificar
+	\end{itemize}
+
+\subsection{Evaluación}
+
+La evaluación de la práctica es mediante la medida del Accuracy estándar, por lo que no habrá penalización entre falsos negativos y falsos positivos, como ocurriría en un problema similar por ejemplo con datos médicos. 
+
+\section{Herramientas y objetivos}
+
+En esta sección veremos una breve introducción a las herramientas usadas para el desarrollo de la práctica así como de los principales objetivos que se buscan conseguir con el desarrollo de la misma. 
+
+\subsection{Hardware}
+
+Las herramientas hardware usadas han sido los pc personales de cada uno de los miembros del equipo, en los cuales alguno carece de GPU y en los demás no se ha podido configurar correctamente  las mismas por lo que el 100\% del computo ha sido llevado a cabo en CPUs.
+\subsection{Software}
+
+El software utilizado es en su práctica totalidad software libre, siendo el restante software propietario cuyas licencias vienen incluidas en el sistema operativo de las máquinas.
+\begin{itemize}
+	\item \textbf{Tensorflow}: Entorno de deeplearning sobre Python. 
+	\item \textbf{Keras}: Capa de abstracción sobre Tensorflow. 
+	\item \textbf{Atom}: Editor de texto plano para la programación de los scripts. 
+	\item \textbf{TeXShop}: procesador de textos basado en \textit{Latex} usado para elaborar la documentación del presente proyecto.
+\end{itemize}
+
+\subsection{Objetivos}
+
+Los objetivos de este trabajo podrían resumirse en los siguientes:
+
+\begin{itemize}
+	\item Obtener un modelo predictivo fiable que dado una nueva imagen pueda predecir si es un arma o un smartphone.
+	\item Obtener un valor de \textit{accuracy} aceptable para escalar posiciones en la competición de Kaggle. 
+	\item Comprender y estudiar las distintas técnicas de minería de datos avanzada vista en la asignatura.
+\end{itemize}
+
+\section{Organización del trabajo} 
+
+La organización del presente documento, se centra en detallar cada uno de los pasos seguidos durante el estudio y resolución del problema planteado en esta introducción. En el capítulo \ref{preprocesado} veremos los scripts y explicaciones asociadas al preprocesado de datos, más concretamente al data augmentation. Finalizaremos las conclusiones y vías futuras que quedan relegadas al capítulo \ref{conclusiones}. 
+
+Los resultados obtenidos en la competición de Kaggle pueden encontrarse en el Anexo de la sección \ref{anexo}.
+\clearpage
+%---------------------------------------------------
