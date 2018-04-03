@@ -5,25 +5,35 @@
 %---------------------------------------------------
 
 \chapter{Preprocesado}
-
 \label{preprocesado}
-
-En este capítulo enunciaremos el proceso de preprocesado llevado a cabo durante la realización de la práctica.
+Dentro del trabajo como analista de datos el apartado del preprocesamiento de los datos es una de las partes más importantes que se han de abordar. En este capítulo enunciaremos el proceso de preprocesado llevado a cabo durante la realización de la práctica.
 
 \section{Resize data}
 
-Uno de los problemas que más nos hemos encontrado en la realización de la práctica es la dimensión de los datos, ya que las imágenes cambian de forma y dimensiones por lo que en función del modelo de red neuronal usado aplicaremos una u otra transformación 
+Uno de los problemas que más nos hemos encontrado en la realización de la práctica es la dimensión de los datos, ya que las imágenes cambian de forma y dimensiones por lo que en función del modelo de red neuronal usado aplicaremos uno u otro tamaño de entrada. 
 
-\begin{figure}[H]
-	\centering
-		\includegraphics[scale=0.4]{./Capitulo2/imagenes/resize.png}
-		\caption{Deformación de la imagen al redimensionar.}
-	\label{resize}
-\end{figure} 
+En este problema en concreto, el problema no es muy elevado, pero en problemas de tipo médico con imágenes de gran resolución contar con un dataset fácilmente manejable en memoria es determinante. En nuestro caso, para las primeras aproximaciones hemos redimensionado los datos a \textbf{54x54} pixeles.
 
-\section{Data Aumentation}
+\section{Data Augmentation}
+
 \label{aumentation}
-Uno de los principales problemas en \textit{deep learning} es la falta de datos. Para ello, pueden usarse técnicas de \textit{data aumentation} que consisten en aplicar ligeras transformaciones a las imágenes para conseguir un conjunto de entrenamiento mayor, pudiendo obtener de una sola imagen 5 o 6 variaciones que enriquecen enormemente el modelo. Para ello, usando las funciones propias de Keras hemos aplicado las siguientes transformaciones a las imágenes:
+Uno de los principales problemas en \textit{deep learning} es la falta de datos. Para ello, pueden usarse técnicas de \textit{data augmentation} que consisten en aplicar ligeras transformaciones a las imágenes para conseguir un conjunto de entrenamiento mayor, pudiendo obtener de una sola imagen 5 o 6 variaciones que enriquecen enormemente el modelo. Para ello, usando las funciones propias de Keras hemos aplicado las siguientes transformaciones a las imágenes:
+
+\begin{itemize}
+\item \textbf{rotation\_range}: Se generan imágenes aleatorias que se rotan una cantidad de grados definidos.
+\item \textbf{rheight\_shift\_range}: Cambio aleatorio en la altura.
+\item \textbf{rwidth\_shift\_range}: Cambio aleatorio en el ancho.
+\item \textbf{rshear\_range}: Rango de corte.
+\item \textbf{rzoom\_range}: Zoom aleatorio.
+\item \textbf{rhorizontal\_flip}: Flip aleatorio de forma horizontal.
+\item \textbf{rfill\_mode}: Relleno de los puntos de la frontera.
+\end{itemize}
+
+Con todos estos cambios generamos un conjunto de imágenes más rico que nos proporciona variedad a la hora de entrenar el modelo, evitando o suavizando así el problema de no contar con muchos datos de entrada para la fase de entrenamiento, el cual sigue siendo uno de los grandes problemas a los que el deep learning se enfrenta. 
+
+\section{Filtros de ruido}
+
+Además de las técnicas anteriormente descritas se han probado distintos filtros de ruido para mejorar el resultado de las imágenes. La mejor solución dentro de la aplicación de estas técnicas la hemos encontrado usando SMOOTH que se fundamenta en el suavizado de fronteras para que sea más sencillo la detección de objetos dentro de las imágenes.
 
 \pagebreak
 \clearpage
